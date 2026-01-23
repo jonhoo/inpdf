@@ -4,7 +4,7 @@ use rmcp::{
     ServerHandler, ServiceExt,
     handler::server::{router::tool::ToolRouter, wrapper::Parameters},
     model::{ServerCapabilities, ServerInfo},
-    schemars, tool, tool_router,
+    schemars, tool, tool_handler, tool_router,
 };
 use serde::{Deserialize, Serialize};
 
@@ -274,6 +274,7 @@ pub struct ExtractResult {
     pub page_count: u32,
 }
 
+#[tool_handler]
 impl ServerHandler for PdfServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
