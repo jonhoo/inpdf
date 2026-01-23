@@ -1,0 +1,16 @@
+[package]
+name = "inpdf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.100"
+clap = { version = "4.5.54", features = ["derive"] }
+lopdf = "0.39.0"
+pdf-extract = "0.10.0"
+regex = "1.12.2"
+rmcp = { version = "0.13.0", features = ["server"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tokio = { version = "1.49.0", features = ["full"] }
+walkdir = "2.5.0"
