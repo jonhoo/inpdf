@@ -3,9 +3,9 @@ use anyhow::{anyhow, Result};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Rotation {
     None,
-    Right,  // 90° clockwise (R)
-    Down,   // 180° (D)
-    Left,   // 90° counter-clockwise (L)
+    Right, // 90° clockwise (R)
+    Down,  // 180° (D)
+    Left,  // 90° counter-clockwise (L)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

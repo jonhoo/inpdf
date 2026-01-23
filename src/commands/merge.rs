@@ -21,9 +21,8 @@ pub fn run<P: AsRef<Path>>(inputs: &[P], output: P) -> Result<()> {
     }
 
     // Load first document as base
-    let mut merged = Document::load(&inputs[0]).with_context(|| {
-        format!("Failed to load PDF: {}", inputs[0].as_ref().display())
-    })?;
+    let mut merged = Document::load(&inputs[0])
+        .with_context(|| format!("Failed to load PDF: {}", inputs[0].as_ref().display()))?;
 
     let mut total_pages = merged.get_pages().len();
 
@@ -50,10 +49,13 @@ pub fn run<P: AsRef<Path>>(inputs: &[P], output: P) -> Result<()> {
                     if let Ok(pages_ref) = catalog.get(b"Pages") {
                         if let lopdf::Object::Reference(pages_id) = pages_ref {
                             if let Ok(pages_dict) = merged.get_dictionary_mut(*pages_id) {
-                                if let Ok(lopdf::Object::Array(kids)) = pages_dict.get_mut(b"Kids") {
+                                if let Ok(lopdf::Object::Array(kids)) = pages_dict.get_mut(b"Kids")
+                                {
                                     kids.push(lopdf::Object::Reference(new_id));
                                 }
-                                if let Ok(lopdf::Object::Integer(count)) = pages_dict.get_mut(b"Count") {
+                                if let Ok(lopdf::Object::Integer(count)) =
+                                    pages_dict.get_mut(b"Count")
+                                {
                                     *count += 1;
                                 }
                             }
@@ -64,9 +66,9 @@ pub fn run<P: AsRef<Path>>(inputs: &[P], output: P) -> Result<()> {
         }
     }
 
-    merged.save(&output).with_context(|| {
-        format!("Failed to save merged PDF: {}", output.as_ref().display())
-    })?;
+    merged
+        .save(&output)
+        .with_context(|| format!("Failed to save merged PDF: {}", output.as_ref().display()))?;
 
     println!(
         "Merged {} files ({} pages) into {}",

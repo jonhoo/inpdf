@@ -1,10 +1,12 @@
 use anyhow::Result;
 use regex::RegexBuilder;
 use rmcp::{
-    ServerHandler, ServiceExt,
-    handler::server::{router::tool::ToolRouter, wrapper::{Json, Parameters}},
+    handler::server::{
+        router::tool::ToolRouter,
+        wrapper::{Json, Parameters},
+    },
     model::{ServerCapabilities, ServerInfo},
-    schemars, tool, tool_handler, tool_router,
+    schemars, tool, tool_handler, tool_router, ServerHandler, ServiceExt,
 };
 use serde::{Deserialize, Serialize};
 
@@ -80,8 +82,13 @@ impl Default for PdfServer {
 
 #[tool_router]
 impl PdfServer {
-    #[tool(description = "Get PDF metadata including title, author, creator, producer, creation date, and page count")]
-    fn pdf_info(&self, Parameters(PathRequest { path }): Parameters<PathRequest>) -> Result<Json<PdfInfoResult>, String> {
+    #[tool(
+        description = "Get PDF metadata including title, author, creator, producer, creation date, and page count"
+    )]
+    fn pdf_info(
+        &self,
+        Parameters(PathRequest { path }): Parameters<PathRequest>,
+    ) -> Result<Json<PdfInfoResult>, String> {
         let doc = PdfDocument::open(&path).map_err(|e| e.to_string())?;
         let info = doc.get_info();
         Ok(Json(PdfInfoResult {
@@ -97,68 +104,101 @@ impl PdfServer {
         }))
     }
 
-    #[tool(description = "Get the table of contents (bookmarks/outlines) from a PDF as structured data")]
-    fn pdf_toc(&self, Parameters(PathRequest { path }): Parameters<PathRequest>) -> Result<Json<TocResult>, String> {
+    #[tool(
+        description = "Get the table of contents (bookmarks/outlines) from a PDF as structured data"
+    )]
+    fn pdf_toc(
+        &self,
+        Parameters(PathRequest { path }): Parameters<PathRequest>,
+    ) -> Result<Json<TocResult>, String> {
         let entries = extract_toc(&path).map_err(|e| e.to_string())?;
         let flat = flatten_toc(&entries);
         Ok(Json(TocResult {
-            entries: flat.into_iter().map(|e| TocEntryResult {
-                title: e.title,
-                page: e.page,
-                level: e.level,
-            }).collect()
+            entries: flat
+                .into_iter()
+                .map(|e| TocEntryResult {
+                    title: e.title,
+                    page: e.page,
+                    level: e.level,
+                })
+                .collect(),
         }))
     }
 
-    #[tool(description = "Get the mapping between physical page numbers (1-indexed) and logical page labels")]
-    fn pdf_page_labels(&self, Parameters(PathRequest { path }): Parameters<PathRequest>) -> Result<Json<PageLabelsResult>, String> {
+    #[tool(
+        description = "Get the mapping between physical page numbers (1-indexed) and logical page labels"
+    )]
+    fn pdf_page_labels(
+        &self,
+        Parameters(PathRequest { path }): Parameters<PathRequest>,
+    ) -> Result<Json<PageLabelsResult>, String> {
         let labels = extract_page_labels(&path).map_err(|e| e.to_string())?;
         Ok(Json(PageLabelsResult {
-            labels: labels.into_iter().map(|l| PageLabelResult {
-                physical_page: l.physical_page,
-                logical_label: l.logical_label,
-            }).collect()
+            labels: labels
+                .into_iter()
+                .map(|l| PageLabelResult {
+                    physical_page: l.physical_page,
+                    logical_label: l.logical_label,
+                })
+                .collect(),
         }))
     }
 
     #[tool(description = "Search for text in a PDF using a regular expression pattern")]
-    fn pdf_grep(&self, Parameters(req): Parameters<PdfGrepRequest>) -> Result<Json<GrepResult>, String> {
+    fn pdf_grep(
+        &self,
+        Parameters(req): Parameters<PdfGrepRequest>,
+    ) -> Result<Json<GrepResult>, String> {
         let regex = RegexBuilder::new(&req.pattern)
             .case_insensitive(req.case_insensitive)
             .build()
             .map_err(|e| format!("Invalid regex: {}", e))?;
 
-        let matches = grep_pdf(&req.path, &regex, req.max_results as usize)
-            .map_err(|e| e.to_string())?;
+        let matches =
+            grep_pdf(&req.path, &regex, req.max_results as usize).map_err(|e| e.to_string())?;
 
         Ok(Json(GrepResult {
-            matches: matches.into_iter().map(|m| GrepMatchResult {
-                page: m.page,
-                line_number: m.line_number,
-                text: m.text,
-                match_start: m.match_start,
-                match_end: m.match_end,
-            }).collect()
+            matches: matches
+                .into_iter()
+                .map(|m| GrepMatchResult {
+                    page: m.page,
+                    line_number: m.line_number,
+                    text: m.text,
+                    match_start: m.match_start,
+                    match_end: m.match_end,
+                })
+                .collect(),
         }))
     }
 
-    #[tool(description = "Extract text content from specific pages of a PDF. Use page range syntax like '1-5,10,15-end'.")]
-    fn pdf_read_pages(&self, Parameters(req): Parameters<PdfReadPagesRequest>) -> Result<Json<ReadPagesResult>, String> {
+    #[tool(
+        description = "Extract text content from specific pages of a PDF. Use page range syntax like '1-5,10,15-end'."
+    )]
+    fn pdf_read_pages(
+        &self,
+        Parameters(req): Parameters<PdfReadPagesRequest>,
+    ) -> Result<Json<ReadPagesResult>, String> {
         let doc = PdfDocument::open(&req.path).map_err(|e| e.to_string())?;
         let total = doc.page_count();
         let page_list = expand_page_ranges(&req.pages, total).map_err(|e| e.to_string())?;
         let texts = extract_text_pages(&req.path, &page_list).map_err(|e| e.to_string())?;
 
         Ok(Json(ReadPagesResult {
-            pages: texts.into_iter().map(|t| PageTextResult {
-                page: t.page,
-                text: t.text,
-            }).collect()
+            pages: texts
+                .into_iter()
+                .map(|t| PageTextResult {
+                    page: t.page,
+                    text: t.text,
+                })
+                .collect(),
         }))
     }
 
     #[tool(description = "Extract specific pages from a PDF and save them to a new file")]
-    fn pdf_extract(&self, Parameters(req): Parameters<PdfExtractRequest>) -> Result<Json<ExtractResult>, String> {
+    fn pdf_extract(
+        &self,
+        Parameters(req): Parameters<PdfExtractRequest>,
+    ) -> Result<Json<ExtractResult>, String> {
         let doc = PdfDocument::open(&req.path).map_err(|e| e.to_string())?;
         let total = doc.page_count();
         let page_list = expand_page_ranges(&req.pages, total).map_err(|e| e.to_string())?;
@@ -263,7 +303,9 @@ pub async fn run_server() -> Result<()> {
     let server = PdfServer::new();
 
     // Serve using stdin/stdout as a tuple
-    let service = server.serve((tokio::io::stdin(), tokio::io::stdout())).await?;
+    let service = server
+        .serve((tokio::io::stdin(), tokio::io::stdout()))
+        .await?;
 
     service.waiting().await?;
 

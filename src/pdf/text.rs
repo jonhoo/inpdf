@@ -5,8 +5,8 @@ use std::path::Path;
 #[allow(dead_code)]
 pub fn extract_text<P: AsRef<Path>>(path: P) -> Result<String> {
     let path = path.as_ref();
-    let bytes = std::fs::read(path)
-        .with_context(|| format!("Failed to read PDF: {}", path.display()))?;
+    let bytes =
+        std::fs::read(path).with_context(|| format!("Failed to read PDF: {}", path.display()))?;
 
     pdf_extract::extract_text_from_mem(&bytes)
         .with_context(|| format!("Failed to extract text from PDF: {}", path.display()))
@@ -15,8 +15,8 @@ pub fn extract_text<P: AsRef<Path>>(path: P) -> Result<String> {
 /// Extract text from specific pages of a PDF
 pub fn extract_text_pages<P: AsRef<Path>>(path: P, pages: &[u32]) -> Result<Vec<PageText>> {
     let path = path.as_ref();
-    let bytes = std::fs::read(path)
-        .with_context(|| format!("Failed to read PDF: {}", path.display()))?;
+    let bytes =
+        std::fs::read(path).with_context(|| format!("Failed to read PDF: {}", path.display()))?;
 
     // pdf-extract doesn't have per-page extraction in its simple API
     // We'll use lopdf to get page count and extract page by page using the lower-level API
@@ -88,8 +88,8 @@ pub fn grep_pdf<P: AsRef<Path>>(
     max_results: usize,
 ) -> Result<Vec<GrepMatch>> {
     let path = path.as_ref();
-    let bytes = std::fs::read(path)
-        .with_context(|| format!("Failed to read PDF: {}", path.display()))?;
+    let bytes =
+        std::fs::read(path).with_context(|| format!("Failed to read PDF: {}", path.display()))?;
 
     let full_text = pdf_extract::extract_text_from_mem(&bytes)
         .with_context(|| format!("Failed to extract text from PDF: {}", path.display()))?;

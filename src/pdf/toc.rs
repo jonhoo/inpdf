@@ -13,8 +13,8 @@ pub struct TocEntry {
 /// Extract table of contents / bookmarks from a PDF
 pub fn extract_toc<P: AsRef<Path>>(path: P) -> Result<Vec<TocEntry>> {
     let path = path.as_ref();
-    let doc = Document::load(path)
-        .with_context(|| format!("Failed to open PDF: {}", path.display()))?;
+    let doc =
+        Document::load(path).with_context(|| format!("Failed to open PDF: {}", path.display()))?;
 
     extract_toc_from_doc(&doc)
 }
@@ -137,11 +137,7 @@ fn get_destination_page(
     None
 }
 
-fn resolve_destination(
-    doc: &Document,
-    dest: &Object,
-    page_map: &[(ObjectId, u32)],
-) -> Option<u32> {
+fn resolve_destination(doc: &Document, dest: &Object, page_map: &[(ObjectId, u32)]) -> Option<u32> {
     match dest {
         // Named destination - look up in Names/Dests
         Object::String(name, _) | Object::Name(name) => {
