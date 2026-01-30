@@ -105,7 +105,7 @@ impl PdfServer {
     }
 
     #[tool(
-        description = "Get the table of contents (bookmarks/outlines) from a PDF as structured data"
+        description = "Get the table of contents (bookmarks/outlines) from a PDF as structured data. Returns empty if the PDF has no embedded bookmarks. Note: Many PDFs lack bookmarks even if they have a visual table of contents in the document text."
     )]
     fn pdf_toc(
         &self,
@@ -126,7 +126,7 @@ impl PdfServer {
     }
 
     #[tool(
-        description = "Get the mapping between physical page numbers (1-indexed) and logical page labels"
+        description = "Get the mapping between physical page numbers (1-indexed) and logical page labels. Logical labels are the printed page numbers shown in the document (e.g., \"i\", \"ii\", \"1\", \"2\", \"A-1\"), which often differ from the physical page position in the file."
     )]
     fn pdf_page_labels(
         &self,
@@ -144,7 +144,7 @@ impl PdfServer {
         }))
     }
 
-    #[tool(description = "Search for text in a PDF using a regular expression pattern")]
+    #[tool(description = "Search for text in a PDF using a regular expression pattern. Case-sensitive by default; set case_insensitive: true for case-insensitive matching. Examples: \"error.*failed\", \"section\\\\s+\\\\d+\", \"foo|bar\".")]
     fn pdf_grep(
         &self,
         Parameters(req): Parameters<PdfGrepRequest>,
@@ -194,7 +194,7 @@ impl PdfServer {
         }))
     }
 
-    #[tool(description = "Extract specific pages from a PDF and save them to a new file")]
+    #[tool(description = "Extract specific pages from a PDF and save them to a new file. Use page range syntax like '1-5,10,15-end'. The output directory must already exist.")]
     fn pdf_extract(
         &self,
         Parameters(req): Parameters<PdfExtractRequest>,

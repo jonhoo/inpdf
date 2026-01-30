@@ -83,8 +83,20 @@ impl PdfDocument {
 
     /// Save to a file
     pub fn save<P: AsRef<Path>>(doc: &mut Document, path: P) -> Result<()> {
-        doc.save(&path)
-            .with_context(|| format!("Failed to save PDF: {}", path.as_ref().display()))?;
+        let path = path.as_ref();
+
+        // Check if parent directory exists before attempting to save
+        if let Some(parent) = path.parent() {
+            if !parent.as_os_str().is_empty() && !parent.exists() {
+                anyhow::bail!(
+                    "Output directory does not exist: {}",
+                    parent.display()
+                );
+            }
+        }
+
+        doc.save(path)
+            .with_context(|| format!("Failed to save PDF: {}", path.display()))?;
         Ok(())
     }
 }
