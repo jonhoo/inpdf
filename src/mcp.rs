@@ -290,16 +290,11 @@ pub struct ExtractResult {
 #[tool_handler]
 impl ServerHandler for PdfServer {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            instructions: Some(
-                "PDF navigation and manipulation tools. Use pdf_info to get document metadata, \
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build()).with_instructions(
+            "PDF navigation and manipulation tools. Use pdf_info to get document metadata, \
                  pdf_toc for table of contents, pdf_grep to search text, pdf_read_pages to extract \
-                 text from specific pages, and pdf_extract to create new PDFs from page ranges."
-                    .to_string(),
-            ),
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            ..Default::default()
-        }
+                 text from specific pages, and pdf_extract to create new PDFs from page ranges.",
+        )
     }
 }
 
