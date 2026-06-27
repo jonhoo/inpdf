@@ -93,7 +93,7 @@ impl PdfServer {
         let info = doc.get_info();
         Ok(Json(PdfInfoResult {
             path,
-            page_count: info.page_count,
+            page_count: info.page_count as i32,
             title: info.title,
             author: info.author,
             creator: info.creator,
@@ -118,8 +118,8 @@ impl PdfServer {
                 .into_iter()
                 .map(|e| TocEntryResult {
                     title: e.title,
-                    page: e.page,
-                    level: e.level,
+                    page: e.page.map(|p| p as i32),
+                    level: e.level as i32,
                 })
                 .collect(),
         }))
@@ -137,7 +137,7 @@ impl PdfServer {
             labels: labels
                 .into_iter()
                 .map(|l| PageLabelResult {
-                    physical_page: l.physical_page,
+                    physical_page: l.physical_page as i32,
                     logical_label: l.logical_label,
                 })
                 .collect(),
@@ -163,11 +163,11 @@ impl PdfServer {
             matches: matches
                 .into_iter()
                 .map(|m| GrepMatchResult {
-                    page: m.page,
-                    line_number: m.line_number,
+                    page: m.page as i32,
+                    line_number: m.line_number as i32,
                     text: m.text,
-                    match_start: m.match_start,
-                    match_end: m.match_end,
+                    match_start: m.match_start as i32,
+                    match_end: m.match_end as i32,
                 })
                 .collect(),
         }))
@@ -189,7 +189,7 @@ impl PdfServer {
             pages: texts
                 .into_iter()
                 .map(|t| PageTextResult {
-                    page: t.page,
+                    page: t.page as i32,
                     text: t.text,
                 })
                 .collect(),
@@ -206,7 +206,7 @@ impl PdfServer {
         let doc = PdfDocument::open(&req.path).map_err(|e| e.to_string())?;
         let total = doc.page_count();
         let page_list = expand_page_ranges(&req.pages, total).map_err(|e| e.to_string())?;
-        let page_count = page_list.len() as u32;
+        let page_count = page_list.len() as i32;
 
         let mut new_doc = doc.extract_pages(&page_list).map_err(|e| e.to_string())?;
         PdfDocument::save(&mut new_doc, &req.output).map_err(|e| e.to_string())?;
@@ -223,7 +223,7 @@ impl PdfServer {
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct PdfInfoResult {
     pub path: String,
-    pub page_count: u32,
+    pub page_count: i32,
     pub title: Option<String>,
     pub author: Option<String>,
     pub creator: Option<String>,
@@ -236,8 +236,8 @@ pub struct PdfInfoResult {
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct TocEntryResult {
     pub title: String,
-    pub page: Option<u32>,
-    pub level: u32,
+    pub page: Option<i32>,
+    pub level: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
@@ -247,7 +247,7 @@ pub struct TocResult {
 
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct PageLabelResult {
-    pub physical_page: u32,
+    pub physical_page: i32,
     pub logical_label: String,
 }
 
@@ -258,11 +258,11 @@ pub struct PageLabelsResult {
 
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct GrepMatchResult {
-    pub page: u32,
-    pub line_number: u32,
+    pub page: i32,
+    pub line_number: i32,
     pub text: String,
-    pub match_start: u32,
-    pub match_end: u32,
+    pub match_start: i32,
+    pub match_end: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
@@ -272,7 +272,7 @@ pub struct GrepResult {
 
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct PageTextResult {
-    pub page: u32,
+    pub page: i32,
     pub text: String,
 }
 
@@ -284,7 +284,7 @@ pub struct ReadPagesResult {
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct ExtractResult {
     pub output_path: String,
-    pub page_count: u32,
+    pub page_count: i32,
 }
 
 #[tool_handler]
