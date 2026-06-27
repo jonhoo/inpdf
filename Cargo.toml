@@ -2,6 +2,11 @@
 name = "inpdf"
 version = "0.1.2"
 edition = "2021"
+description = "A CLI tool and MCP server for searching, navigating, and extracting content from PDFs."
+license = "MIT"
+repository = "https://github.com/jonhoo/inpdf"
+keywords = ["pdf", "mcp", "cli", "extract", "search"]
+categories = ["command-line-utilities", "text-processing"]
 
 [profile.release]
 debug = true
