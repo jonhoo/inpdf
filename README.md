@@ -66,7 +66,7 @@ This exposes tools like `pdf_grep`, `pdf_read_pages`, `pdf_info`, `pdf_toc`, and
 ## Installation
 
 ```bash
-git clone https://github.com/youruser/inpdf
+git clone https://github.com/jonhoo/inpdf
 cd inpdf
 cargo build --release
 # Binary is at target/release/inpdf
